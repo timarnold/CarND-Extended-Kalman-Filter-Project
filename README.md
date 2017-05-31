@@ -1,120 +1,61 @@
-# Extended Kalman Filter Project Starter Code
-Self-Driving Car Engineer Nanodegree Program
+# Extended Kalman Filter
 
-In this project utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower that the tolerance outlined in the project reburic. 
+This repository is the solution for [Term 2, Project 1](https://github.com/udacity/CarND-Extended-Kalman-Filter-Project/) of the [Self-Driving Car Engineer Nanodegree](https://www.udacity.com/course/self-driving-car-engineer-nanodegree--nd013) program.
 
-This project involves the Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases)
+In this project we implement an [Extended Kalman Filter](https://en.wikipedia.org/wiki/Extended_Kalman_filter) (EKF) to make belief estimates of the position and velocity of an object based on noisy [Lidar](https://en.wikipedia.org/wiki/Lidar) and [Radar](https://en.wikipedia.org/wiki/Radar) measurements of that object's position and velocity. The EKF differs from a plain [Kalman Filter](https://en.wikipedia.org/wiki/Kalman_filter) (KF) in that it allows nonlinear (but differentiable) state transition and observation models. It accomplishes this by using a linear estimate of the non-linear functions using a [Taylor series](https://en.wikipedia.org/wiki/Taylor_series). 
 
-This repository includes two files that can be used to set up and intall [uWebSocketIO](https://github.com/uWebSockets/uWebSockets) for either Linux or Mac systems. For windows you can use either Docker, VMware, or even [Windows 10 Bash on Ubuntu](https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/) to install uWebSocketIO. 
+In this project, the EKF allows us to incorporate measurements from the non-cartesian coordinate space in which the radar measurements are provided. Using the EKF, we fuse measurements from laser and radar measurements to arrive at a single belief of position and velocity over time. Our state transition model remains linear and does not require a linearization step.
 
-Once the install for uWebSocketIO is complete, the main program can be built and ran by doing the following from the project top directory.
+## Project Files
 
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make
-5. ./ExtendedKF
+The project respository is organized as follows.
 
-Note that the programs that need to be written to accomplish the project are src/FusionEKF.cpp, src/FusionEKF.h, kalman_filter.cpp, kalman_fitler.h, tools.cpp, and tools.h
+* [`src`](src) directory contains the source files for the project, including:
+	* [`main.cpp`](src/main.cpp) runs the application and interfaces with the [Udacity simulator app](https://github.com/udacity/self-driving-car-sim/tags) to plot results.
+	* [`FusionEKF.cpp`](src/FusionEKF.cpp) owns a `KalmanFilter` instance. Initializes the parameters of the `KalmanFitler` object and processes measurements by sending them to the appropriate `KalmanFilter` instance methods.
+	* [`kalman_filter.cpp`](src/kalman_filter.cpp) defines a `KalmanFilter` class, which maintains the belief vector and covariance through many predict/update steps. It has instance methods `Predict`, `Update`, and `UpdateEKF` which implement plain and extended Kalman filter steps. `Update` accepts a laser measurement of the object's position in the cartesian coordinate system. `UpdateEKF` accepts a radar measurement of the object's position and velocity in a [polar coordinate system](https://en.wikipedia.org/wiki/Polar_coordinate_system).
+	* [`tools.cpp`](tools.cpp) contains helper functions, e.g. for calculating root mean square error, the EKF Jacobian, and coordinate system conversions.
+* [`build`](build) directory containing build products and executable
+* [`Notebook.ipynb`](Notebook.ipynb) containing some analysis and Python code to create figures
+* [`results`](results) directory containing figures and results
+* [`data`](data) directory containing input and output data
 
-The program main.cpp has already been filled out, but feel free to modify it.
+For details on the rest of the project, see [`Assignment.md`](Assignment.md) and the [original project repository](https://github.com/udacity/CarND-Extended-Kalman-Filter-Project/).
 
-Here is the main protcol that main.cpp uses for uWebSocketIO in communicating with the simulator.
+## Build and Run
 
+This project has been built and To run the project, perform the following steps:
 
-INPUT: values provided by the simulator to the c++ program
-
-["sensor_measurement"] => the measurment that the simulator observed (either lidar or radar)
-
-
-OUTPUT: values provided by the c++ program to the simulator
-
-["estimate_x"] <= kalman filter estimated position x
-["estimate_y"] <= kalman filter estimated position y
-["rmse_x"]
-["rmse_y"]
-["rmse_vx"]
-["rmse_vy"]
-
----
-
-## Other Important Dependencies
-
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-
-## Basic Build Instructions
-
-1. Clone this repo.
+1. Clone this repository.
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make` 
-   * On windows, you may need to run: `cmake .. -G "Unix Makefiles" && make`
-4. Run it: `./ExtendedKF path/to/input.txt path/to/output.txt`. You can find
-   some sample inputs in 'data/'.
-    - eg. `./ExtendedKF ../data/obj_pose-laser-radar-synthetic-input.txt`
+4. Run the executable: `./ExtendedKF`
+5. Launch the [Udacity simulator app](https://github.com/udacity/self-driving-car-sim/tags) (tested on version 1.4)
+6. Choose a resolution/quality
+7. Click "Select" for "Project 1/2: EKF and UKF"
+8. Click "Start"
 
-## Editor Settings
+The output of the EKF will show in the Term 2 simulator and in the console. To obtain the results found in [`data/output.txt`](data/output.txt), the output from Step 4 is piped into an output file from the shell, and minimally cleaned up to be used by `Notebook.ipynb`.
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+## Results
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+The table below shows the root mean squared error (RMSE) for our results, along with the project criteria below which our RMSE must be. The uncertainty associated with the Kalman Filter belief decreases over time (with measurements of roughly uniform uncertainty), and so our final RMSE values are lower than the RMSE values when the simulation begins.
 
-## Code Style
+All the final RMSE values fall below the project criteria, although for some of the dimensions, a substantial fraction of measurements are higher than the criterion values (especially velocity, which we obtain only from radar measurements).
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+| Dimension    | Rows Failing RMSE Criterion | Final RMSE | Project RMSE Criterion |
+|--------------|-----------------------------|------------|------------------------|
+| `x`          | 6.81%                       | 0.097      | 0.11                   |
+| `y`          | 0.00%                       | 0.085      | 0.11                   |
+| `v_x`        | 67.54%                      | 0.451      | 0.52                   |
+| `v_y`        | 32.46%                      | 0.440      | 0.52                   |
 
-## Generating Additional Data
+The figure below shows the entire field of measurements, including ground truth, Kalman belief, and radar and lidar measurements.
 
-This is optional!
+![Figure 1: Overview of results](./results/fig1.png)
 
-If you'd like to generate your own radar and lidar data, see the
-[utilities repo](https://github.com/udacity/CarND-Mercedes-SF-Utilities) for
-Matlab scripts that can generate additional data.
+The following three figures show three different zoomed-in regions from the first plot, showing areas of particular interest. Note that the Kalman belief deviates most substantially from the ground truth in regions of highly nonlinear travel. This makes sense, as our state transition model is linear and our motion is not always best described by linear motion.
 
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project resources page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/382ebfd6-1d55-4487-84a5-b6a5a4ba1e47)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! We'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Regardless of the IDE used, every submitted project must
-still be compilable with cmake and make.
+![Figure 2](./results/fig2.png)
+![Figure 3](./results/fig3.png)
+![Figure 4](./results/fig4.png)
